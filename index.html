@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Владу 30!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        section {
+            margin-bottom: 80px;
+        }
+        .subtitle {
+            color: #888;
+            font-size: 16px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 56px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 40px;
+            line-height: 1.1;
+        }
+        h2 {
+            font-size: 40px;
+            color: #feca57;
+            margin-bottom: 30px;
+        }
+
+        /* ===== COUNTDOWN ===== */
+        .countdown {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .time-box {
+            background: linear-gradient(145deg, #1a1a1a, #0f0f0f);
+            border: 1px solid #2a2a2a;
+            border-radius: 16px;
+            padding: 30px 10px;
+        }
+        .time-number {
+            font-size: 56px;
+            font-weight: 700;
+            color: #feca57;
+            line-height: 1;
+            margin-bottom: 10px;
+            font-variant-numeric: tabular-nums;
+        }
+        .time-label {
+            color: #888;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .footer-text {
+            margin-top: 50px;
+            color: #555;
+            font-size: 15px;
+            font-style: italic;
+        }
+
+        /* ===== MEMORY GAME ===== */
+        .game-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .info-box {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 15px 25px;
+        }
+        .info-label {
+            color: #888;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #feca57;
+            font-variant-numeric: tabular-nums;
+        }
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card {
+            aspect-ratio: 1;
+            background: transparent;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
+        .card.flipped .card-inner,
+        .card.matched .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .card-front {
+            background: linear-gradient(145deg, #ff6b6b, #feca57);
+            font-size: 40px;
+            font-weight: 700;
+            color: #0a0a0a;
+        }
+        .card-back {
+            background: #1a1a1a;
+            border: 2px solid #feca57;
+            transform: rotateY(180deg);
+        }
+        .card-back img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card.matched .card-back {
+            border-color: #4ade80;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+        }
+
+        .restart-btn {
+            margin-top: 30px;
+            padding: 14px 32px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            color: #0a0a0a;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        /* ===== LEADERBOARD ===== */
+        .leaderboard {
+            max-width: 500px;
+            margin: 30px auto 0;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 16px;
+            padding: 25px;
+        }
+        .leaderboard h3 {
+            color: #feca57;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #2a2a2a;
+            font-size: 16px;
+        }
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+        .leaderboard-rank {
+            color: #feca57;
+            font-weight: 700;
+            width: 40px;
+            text-align: left;
+        }
+        .leaderboard-name {
+            flex: 1;
+            text-align: left;
+            color: #fff;
+        }
+        .leaderboard-time {
+            color: #888;
+            font-variant-numeric: tabular-nums;
+        }
+        .leaderboard-empty {
+            color: #555;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        /* ===== WIN MODAL ===== */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: linear-gradient(145deg, #1a1a1a, #0f0f0f);
+            border: 2px solid #feca57;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+        }
+        .modal-content h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        .modal-content p {
+            color: #888;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 14px;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .modal-content input:focus {
+            outline: none;
+            border-color: #feca57;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-buttons button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-save {
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            color: #0a0a0a;
+        }
+        .btn-skip {
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 36px; }
+            h2 { font-size: 28px; }
+            .time-number { font-size: 32px; }
+            .countdown { gap: 8px; }
+            .time-box { padding: 20px 5px; }
+            .time-label { font-size: 10px; letter-spacing: 1px; }
+            .memory-grid { gap: 6px; }
+            .card-front { font-size: 24px; }
+            .info-value { font-size: 20px; }
+            .info-box { padding: 10px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ====== COUNTDOWN SECTION ====== -->
+    <section class="container">
+        <div class="subtitle">Внимание</div>
+        <h1>До тридцатилетия Влада осталось:</h1>
+        
+        <div class="countdown">
+            <div class="time-box">
+                <div class="time-number" id="days">00</div>
+                <div class="time-label">Дней</div>
+            </div>
+            <div class="time-box">
+                <div class="time-number" id="hours">00</div>
+                <div class="time-label">Часов</div>
+            </div>
+            <div class="time-box">
+                <div class="time-number" id="minutes">00</div>
+                <div class="time-label">Минут</div>
+            </div>
+            <div class="time-box">
+                <div class="time-number" id="seconds">00</div>
+                <div class="time-label">Секунд</div>
+            </div>
+        </div>
+
+        <p class="footer-text">Назад дороги нет. Время не остановить.</p>
+    </section>
+
+    <!-- ====== MEMORY GAME SECTION ====== -->
+    <section class="container">
+        <div class="subtitle">Мини-игра</div>
+        <h2>Найди пару Владу</h2>
+
+        <div class="game-info">
+            <div class="info-box">
+                <div class="info-label">Время</div>
+                <div class="info-value" id="timer">00:00</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">Ходы</div>
+                <div class="info-value" id="moves">0</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">Найдено</div>
+                <div class="info-value" id="matches">0 / 8</div>
+            </div>
+        </div>
+
+        <div class="memory-grid" id="memoryGrid"></div>
+
+        <button class="restart-btn" onclick="startGame()">Заново</button>
+
+        <div class="leaderboard">
+            <h3>🏆 Топ-5 быстрейших</h3>
+            <div id="leaderboardList">
+                <div class="leaderboard-empty">Пока никто не играл. Будь первым!</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== VLAD-O-METER SECTION ====== -->
+    <section class="container">
+        <div class="subtitle">Диагностика</div>
+        <h2>Влад-о-метр</h2>
+        <p class="meter-intro">Полное обследование пациента на 30-летие</p>
+
+        <div class="meters">
+            <div class="meter">
+                <div class="meter-header">
+                    <span class="meter-label">Уровень мудрости</span>
+                    <span class="meter-value" data-target="30">0%</span>
+                </div>
+                <div class="meter-bar"><div class="meter-fill" data-target="30"></div></div>
+            </div>
+
+            <div class="meter">
+                <div class="meter-header">
+                    <span class="meter-label">Сохранность волос</span>
+                    <span class="meter-value" data-target="45">0%</span>
+                </div>
+                <div class="meter-bar"><div class="meter-fill" data-target="45"></div></div>
+            </div>
+
+            <div class="meter">
+                <div class="meter-header">
+                    <span class="meter-label">Способность к отмазкам</span>
+                    <span class="meter-value" data-target="98">0%</span>
+                </div>
+                <div class="meter-bar"><div class="meter-fill" data-target="98"></div></div>
+            </div>
+
+            <div class="meter">
+                <div class="meter-header">
+                    <span class="meter-label">Желание идти в клуб</span>
+                    <span class="meter-value" data-target="12">0%</span>
+                </div>
+                <div class="meter-bar"><div class="meter-fill" data-target="12"></div></div>
+            </div>
+
+            <div class="meter">
+                <div class="meter-header">
+                    <span class="meter-label">Боль в спине по утрам</span>
+                    <span class="meter-value" data-target="87">0%</span>
+                </div>
+                <div class="meter-bar"><div class="meter-fill" data-target="87"></div></div>
+            </div>
+
+            <div class="meter">
+                <div class="meter-header">
+                    <span class="meter-label">Готовность ложиться в 22:00</span>
+                    <span class="meter-value" data-target="95">0%</span>
+                </div>
+                <div class="meter-bar"><div class="meter-fill" data-target="95"></div></div>
+            </div>
+
+            <div class="meter">
+                <div class="meter-header">
+                    <span class="meter-label">Уровень брюзжания</span>
+                    <span class="meter-value" data-target="78">0%</span>
+                </div>
+                <div class="meter-bar"><div class="meter-fill" data-target="78"></div></div>
+            </div>
+
+            <div class="meter">
+                <div class="meter-header">
+                    <span class="meter-label">Любовь к Владу со стороны друзей</span>
+                    <span class="meter-value" data-target="100">0%</span>
+                </div>
+                <div class="meter-bar"><div class="meter-fill meter-fill-love" data-target="100"></div></div>
+            </div>
+        </div>
+
+        <p class="diagnosis">Диагноз: <span class="diagnosis-result">пациент скорее жив, чем мёртв</span></p>
+    </section>
+
+    <!-- ====== CONGRATS SECTION ====== -->
+    <section class="container congrats-section">
+        <div class="subtitle">Финал</div>
+        <h2 class="congrats-title">Влад, с днём рождения! 🎉</h2>
+        <button class="congrats-btn" onclick="launchConfetti()">Нажми меня</button>
+        <div class="congrats-message" id="congratsMessage">
+            <p>Тридцать — это не приговор, это апгрейд.</p>
+            <p>Спасибо что ты есть. Будь здоров, не болей, не парься по мелочам.</p>
+            <p>Мы тебя любим!.</p>
+            <p class="signature">— Твои друзья</p>
+        </div>
+    </section>
+
+    <!-- ====== WIN MODAL ====== -->
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <h2>🎉 Победа!</h2>
+            <p>Ты нашёл всех Владов за <span id="winTime">00:00</span></p>
+            <input type="text" id="playerName" placeholder="Твоё имя" maxlength="15">
+            <div class="modal-buttons">
+                <button class="btn-save" onclick="saveResult()">Сохранить</button>
+                <button class="btn-skip" onclick="closeModal()">Пропустить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== COUNTDOWN =====
+        const birthday = new Date('2026-07-09T00:00:00').getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = birthday - now;
+
+            if (diff < 0) {
+                document.querySelector('h1').textContent = 'Влад, тебе 30! Поздравляем 🎉';
+                document.querySelector('.countdown').style.display = 'none';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = String(days).padStart(2, '0');
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // ===== MEMORY GAME =====
+        const TOTAL_PAIRS = 8;
+        let flippedCards = [];
+        let matchedCount = 0;
+        let moves = 0;
+        let timerInterval = null;
+        let startTime = null;
+        let elapsedSeconds = 0;
+        let canFlip = true;
+
+        function startGame() {
+            const grid = document.getElementById('memoryGrid');
+            grid.innerHTML = '';
+
+            const cards = [];
+            for (let i = 1; i <= TOTAL_PAIRS; i++) {
+                cards.push(i, i);
+            }
+            cards.sort(() => Math.random() - 0.5);
+
+            cards.forEach((num, idx) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.value = num;
+                card.dataset.index = idx;
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">?</div>
+                        <div class="card-back">
+                            <img src="images/vlad${num}.jpg" alt="Влад ${num}">
+                        </div>
+                    </div>
+                `;
+                card.addEventListener('click', () => flipCard(card));
+                grid.appendChild(card);
+            });
+
+            flippedCards = [];
+            matchedCount = 0;
+            moves = 0;
+            elapsedSeconds = 0;
+            canFlip = true;
+            startTime = null;
+
+            document.getElementById('moves').textContent = '0';
+            document.getElementById('matches').textContent = '0 / 8';
+            document.getElementById('timer').textContent = '00:00';
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+                const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+                const s = String(elapsedSeconds % 60).padStart(2, '0');
+                document.getElementById('timer').textContent = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function flipCard(card) {
+            if (!canFlip) return;
+            if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+            if (flippedCards.length >= 2) return;
+
+            if (!startTime) startTimer();
+
+            card.classList.add('flipped');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                moves++;
+                document.getElementById('moves').textContent = moves;
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const [c1, c2] = flippedCards;
+            if (c1.dataset.value === c2.dataset.value) {
+                c1.classList.add('matched');
+                c2.classList.add('matched');
+                matchedCount++;
+                document.getElementById('matches').textContent = `${matchedCount} / 8`;
+                flippedCards = [];
+
+                if (matchedCount === TOTAL_PAIRS) {
+                    endGame();
+                }
+            } else {
+                canFlip = false;
+                setTimeout(() => {
+                    c1.classList.remove('flipped');
+                    c2.classList.remove('flipped');
+                    flippedCards = [];
+                    canFlip = true;
+                }, 900);
+            }
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+            const s = String(elapsedSeconds % 60).padStart(2, '0');
+            document.getElementById('winTime').textContent = `${m}:${s}`;
+            document.getElementById('winModal').classList.add('show');
+        }
+
+        // ===== LEADERBOARD =====
+        function getLeaderboard() {
+            const data = localStorage.getItem('vladLeaderboard');
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveResult() {
+            const name = document.getElementById('playerName').value.trim() || 'Аноним';
+            const board = getLeaderboard();
+            board.push({ name, time: elapsedSeconds, moves });
+            board.sort((a, b) => a.time - b.time);
+            const top5 = board.slice(0, 5);
+            localStorage.setItem('vladLeaderboard', JSON.stringify(top5));
+            renderLeaderboard();
+            closeModal();
+        }
+
+        function closeModal() {
+            document.getElementById('winModal').classList.remove('show');
+            document.getElementById('playerName').value = '';
+        }
+
+        function renderLeaderboard() {
+            const board = getLeaderboard();
+            const list = document.getElementById('leaderboardList');
+            if (board.length === 0) {
+                list.innerHTML = '<div class="leaderboard-empty">Пока никто не играл. Будь первым!</div>';
+                return;
+            }
+            list.innerHTML = board.map((entry, i) => {
+                const m = String(Math.floor(entry.time / 60)).padStart(2, '0');
+                const s = String(entry.time % 60).padStart(2, '0');
+                const medals = ['🥇', '🥈', '🥉'];
+                const rank = medals[i] || `${i + 1}.`;
+                return `
+                    <div class="leaderboard-item">
+                        <span class="leaderboard-rank">${rank}</span>
+                        <span class="leaderboard-name">${entry.name}</span>
+                        <span class="leaderboard-time">${m}:${s} • ${entry.moves} ходов</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== INIT =====
+        startGame();
+        renderLeaderboard();
+    </script>
+</body>
+</html>
