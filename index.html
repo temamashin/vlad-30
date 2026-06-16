@@ -229,6 +229,126 @@
             padding: 20px;
         }
 
+        /* ===== VLAD-O-METER ===== */
+        .meter-intro {
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .meters {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        .meter {
+            margin-bottom: 22px;
+        }
+        .meter-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        .meter-label {
+            color: #fff;
+        }
+        .meter-value {
+            color: #feca57;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+        .meter-bar {
+            height: 12px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            border-radius: 8px;
+            transition: width 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .meter-fill-love {
+            background: linear-gradient(90deg, #ff6b6b, #ec4899);
+        }
+        .diagnosis {
+            margin-top: 35px;
+            color: #888;
+            font-size: 16px;
+            font-style: italic;
+        }
+        .diagnosis-result {
+            color: #feca57;
+            font-weight: 700;
+        }
+
+        /* ===== CONGRATS ===== */
+        .congrats-section {
+            padding: 60px 20px;
+        }
+        .congrats-title {
+            font-size: 48px;
+            margin-bottom: 30px;
+        }
+        .congrats-btn {
+            padding: 18px 48px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            color: #0a0a0a;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+            transition: transform 0.2s;
+        }
+        .congrats-btn:hover {
+            transform: scale(1.05);
+        }
+        .congrats-message {
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s, transform 0.8s;
+        }
+        .congrats-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .congrats-message p {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 18px;
+            color: #fff;
+        }
+        .signature {
+            margin-top: 30px !important;
+            color: #888 !important;
+            font-style: italic;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            z-index: 1000;
+            pointer-events: none;
+            border-radius: 2px;
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(720deg);
+            }
+        }
+
         /* ===== WIN MODAL ===== */
         .modal {
             position: fixed;
@@ -303,6 +423,7 @@
         @media (max-width: 600px) {
             h1 { font-size: 36px; }
             h2 { font-size: 28px; }
+            .congrats-title { font-size: 32px; }
             .time-number { font-size: 32px; }
             .countdown { gap: 8px; }
             .time-box { padding: 20px 5px; }
@@ -311,6 +432,7 @@
             .card-front { font-size: 24px; }
             .info-value { font-size: 20px; }
             .info-box { padding: 10px 15px; }
+            .congrats-message p { font-size: 17px; }
         }
     </style>
 </head>
@@ -458,7 +580,7 @@
         <div class="congrats-message" id="congratsMessage">
             <p>Тридцать — это не приговор, это апгрейд.</p>
             <p>Спасибо что ты есть. Будь здоров, не болей, не парься по мелочам.</p>
-            <p>Мы тебя любим!.</p>
+            <p>Мы тебя любим, даже когда ты бесишь.</p>
             <p class="signature">— Твои друзья</p>
         </div>
     </section>
@@ -656,6 +778,49 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // ===== VLAD-O-METER =====
+        const meterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('.meter-fill').forEach(fill => {
+                        fill.style.width = fill.dataset.target + '%';
+                    });
+                    document.querySelectorAll('.meter-value').forEach(val => {
+                        const target = parseInt(val.dataset.target);
+                        let current = 0;
+                        const step = target / 60;
+                        const interval = setInterval(() => {
+                            current += step;
+                            if (current >= target) {
+                                current = target;
+                                clearInterval(interval);
+                            }
+                            val.textContent = Math.round(current) + '%';
+                        }, 30);
+                    });
+                    meterObserver.disconnect();
+                }
+            });
+        }, { threshold: 0.3 });
+
+        const metersEl = document.querySelector('.meters');
+        if (metersEl) meterObserver.observe(metersEl);
+
+        // ===== CONFETTI =====
+        function launchConfetti() {
+            const colors = ['#ff6b6b', '#feca57', '#4ade80', '#60a5fa', '#ec4899'];
+            for (let i = 0; i < 100; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                c.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 4000);
+            }
+            document.getElementById('congratsMessage').classList.add('show');
         }
 
         // ===== INIT =====
