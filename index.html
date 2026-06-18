@@ -736,7 +736,7 @@
             document.getElementById('winModal').classList.add('show');
         }
 
-        // ===== LEADERBOARD =====
+// ===== LEADERBOARD =====
         function getLeaderboard() {
             const data = localStorage.getItem('vladLeaderboard');
             return data ? JSON.parse(data) : [];
@@ -779,7 +779,7 @@
                 `;
             }).join('');
         }
-
+        
         // ===== VLAD-O-METER =====
         const meterObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
